@@ -1,0 +1,203 @@
+"""
+April 15, 2020
+"""
+
+#form basic structure, distinguishes upstream and downstream with ATG in middle
+#takes in the start codon and a certain length (len(seq) = length*2+3)
+def BasicStructure(start, length):
+
+    seq = []
+    seq += 'u' * length
+    seq += start
+    seq += 'd' * length
+
+    #print(seq)
+    #print("".join(i for i in seq))
+    return seq
+
+
+def PWMtoBase(A,C,G,T):
+
+    import random
+
+    total = A+C+G+T
+
+    prob = random.randint(1,total)
+    if prob <= A:
+        return 'A'
+    elif prob > A and prob <= A+C:
+        return 'C'
+    elif prob > A+T and prob <= A+C+G:
+        return 'G'
+    else:
+        return 'T'
+
+
+#adds consensus sequence around ATG
+#takes length, sequence, and a dictionary with probabilities
+def ConsensusSequence(length, seq, consensus):
+
+    import random
+
+    #keys span from negative to positive number, with ATG being 0,1,2
+    for i in consensus.keys():
+        seq[length+i] = PWMtoBase(consensus[i][0],consensus[i][1],consensus[i][2],consensus[i][3])
+
+    #print(seq)
+    #print("".join(i for i in seq)+"hey?")
+    return seq
+
+
+#Add the upstream start codon
+#takes in start codon, length, sequence, length of upstream consensus sequence
+#train indicates whether dataset is positive or negative
+def UpstreamStart(start, length, seq, len_upcons, train):
+
+    import random
+
+    #only add start codons upstream of consensus sequence
+    length -= len_upcons
+
+    if train == 'pos':
+        n = random.choices([0,1,2], [60,20,20])[0]
+    else:
+        n = random.randint(0,1)
+    """
+    PROBLEM?
+    Start codon inserted randomly when filling the bases, regardless of the start codon addition
+    """
+
+    #select a random position to insert start codon
+    if n == 1:
+        pos1 = random.randint(0, length-3)
+        seq[pos1:pos1+3] = start
+    elif n == 2:
+        pos1 = random.randint(0, length-6)
+        pos2 = random.randint(pos1 + 3, length-3)
+        seq[pos1:pos1+3] = start
+        seq[pos2:pos2+3] = start
+
+    #print(seq)
+    #print("".join(i for i in seq))
+    return seq
+
+
+#add downstream stop codon for negatvie datasets
+#takes in list of stop codons, length, sequence, and length of downstream consensus
+def DownstreamStop(stop_list, length, seq, len_downcons):
+
+    import random
+
+    #select a random stop codon
+    stop = random.choice(stop_list)
+    #select random position for stop codon
+    stop_site = random.randint(length+len_downcons+2, length*2)
+    seq[stop_site:stop_site+3] = stop
+
+    #print(seq)
+    #print("".join(i for i in seq))
+    return seq
+
+
+#fill all the other bases
+#takes in length, sequence, and 'neg'/'pos'
+def Fill(length, seq, len_upcons, len_downcons, train):
+
+    import random
+
+    #negative training set
+    if train == 'neg':
+        for i in range(0,len(seq)):
+            if seq[i] in ['A','C','G','T']:
+                continue
+            #if the base isn't filled already, fill with probability
+            #for neg, upstream and downstream are same (untranslated)
+            seq[i] = PWMtoBase(29.32,18.44,16.51,35.73)
+
+        #print(seq)
+        #print("".join(i for i in seq))
+        return seq
+
+    #for positive dataset
+    #use different probability for upstream and downstream
+    for up in range(0, length):
+        if seq[up] != 'u':
+            continue
+        seq[up] = PWMtoBase(29.32,18.44,16.51,35.73)
+
+    for down in range(length+3, len(seq)):
+        if seq[down] != 'd':
+            continue
+        seq[down] = PWMtoBase(27.60,21.06,24.86,26.48)
+
+    #print(seq)
+    #print("".join(i for i in seq))
+    return seq
+
+
+#generate tis
+def Generate(train):
+
+    import random
+
+    start = ['A','T','G']
+    stop_list = [['T', 'A', 'A'], ['T', 'A', 'G'], ['T', 'G', 'A']]
+    length = 150
+
+    #dictionary of consensus sequence positions and probabilities
+    #['A','C','G','T']
+    consensus = {
+        -10:[37,18,18,28], -9:[33,19,19,29], -8:[35,23,15,28], -7:[37,18,17,28], -6:[37,15,21,27], -5:[32,26,16,26], -4:[48,18,18,17], -3:[60,8,22,11], -2:[47,29,7,17], -1:[48,22,17,13],
+        3:[15,5,67,12], 4:[22,53,15,11], 5:[22,11,29,38], 6:[35,14,28,23], 7:[24,36,18,23], 8:[23,25,21,32], 9:[29,18,26,27], 10:[25,30,14,30], 11:[29,21,19,31], 12:[34,18,29,19]
+    }
+
+    #find lengths of upstream and downstream consensus sequences
+    len_upcons = 0
+    len_downcons = 0
+    for count in consensus.keys():
+        if count > 0:
+            len_upcons += 1
+        else:
+            len_downcons += 1
+
+    #generate the sequence
+    seq = BasicStructure(start, length)
+    if train == 'pos':
+        seq = ConsensusSequence(length, seq, consensus)
+    seq = UpstreamStart(start, length, seq, len_upcons, train)
+    if train == 'neg':
+        seq = DownstreamStop(stop_list, length, seq, len_downcons)
+    seq = Fill(length, seq, len_upcons, len_downcons, train)
+
+    return seq
+
+
+#write generated TIS in text file
+def WriteTIS():
+
+    p = open("tis_pos2.txt", "w+")
+    n = open("tis_neg2.txt", "w+")
+
+    for i in range(0, 10):
+        p.write("".join(i for i in Generate('pos')) + "\n")
+        n.write("".join(j for j in Generate('neg')) + "\n")
+
+    p.close()
+    n.close()
+
+#Generate('pos')
+#Generate('neg')
+WriteTIS()
+
+def check():
+
+    p = open("tis_pos2.txt", "r")
+    pos = p.readlines()
+
+    for j in pos:
+
+        print([(j[i:i+3]) for i in range(0, len(j), 3)])
+
+
+check()
+# (check())
