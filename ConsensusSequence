@@ -1,0 +1,88 @@
+'''
+May 7, 2020
+'''
+
+"""
+This python script makes a position weight matrix of the consensus sequence around TIS.
+It reads a file of genomic sequences and gives another file of consensus sequence.
+"""
+
+#readFasta reads the fasta file given and
+# formats it into the consensus sequence (length of 20 bp)
+# The file has a ATG in the middle and has same number of nucleotides up/downstream of the ATG
+def readFasta(file):
+
+    #list to save the consensus sequences
+    cons = []
+    #read the fasta file line by line
+    for seq in open(file, 'r').readlines():
+        #find the length of the up/downstream sequences of TIS
+        #   assumes that the upstream and downstream have the same length
+        l = int((len(seq)-3)/2)
+        #find the upstream consensus sequence (length 10)
+        up = seq[l-10:l]
+        #print(len(up))
+        #find the downstream consensus sequence (length 10)
+        down = seq[l+3:l+13]
+        #print(len(down))
+        #add the consensus sequence to the list
+        cons += [up+down]
+
+    return cons
+
+
+#The sequence function takes in a file of TIS sequences and produces the position weight matrix of the consensus sequence
+#   The sequence has equal number of up/downstream divided by ATG
+def sequence(file):
+
+    #get the consensus sequences of each sequence in list form
+    cons = readFasta(file)
+    l = len(cons)
+
+    #Each list in consensus represent each row of pwm; each column represents the position on the sequence
+    consensus = [['A'],['C'],['G'],['T']]
+    #consensus = dict()
+    #position = [-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,3,4,5,6,7,8,9,10,11,12]
+
+    #Create a loop ranging along the length of the consensus
+    for i in range(0, 20):
+        #Reset the values for each nucleotide to 0
+        #   These will count the number of occurences of the nucleotide on a certain position
+        A,C,G,T = 0,0,0,0
+        #Create another loop that reads each consensus sequence
+        #   A nucleotide of certain position of all the sequences in the file will be put forward
+        for j in cons:
+            #Add to the nucleotide value if that nucleotide exists
+            if j[i] == 'A':
+                A += 1
+            elif j[i] == 'C':
+                C += 1
+            elif j[i] == 'G':
+                G += 1
+            elif j[i] == 'T':
+                T += 1
+
+        #After adding all the occurences of each nucleotide, divide it by the total number of seqneuces
+        #   Add it to the list
+        consensus[0].append(str(round(A/l*100)))
+        consensus[1].append(str(round(C/l*100)))
+        consensus[2].append(str(round(G/l*100)))
+        consensus[3].append(str(round(T/l*100)))
+    return consensus
+
+
+#This function writes the consensus sequence to an output file.
+#   The pwm is separated by a space for each position
+def writeConsensus(inputfile, outputfile):
+
+    output = open(outputfile, 'w+')
+    #Get the position weights of each nucleotide using 'sequence' function
+    consensus = sequence(inputfile)
+
+    for i in consensus:
+        #Write the pwm into the file, each term separated by a space
+        output.write(" ".join(j for j in i)+'\n')
+
+    output.close()
+
+writeConsensus('at_pos_dic2013.txt', 'consensus.txt')
