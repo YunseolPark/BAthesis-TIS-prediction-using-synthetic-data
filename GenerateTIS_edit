@@ -169,7 +169,7 @@ def DownstreamStop(stop_list, length, seq, l):
     #print("".join(i for i in seq))
     return seq
 
-
+"""
 '''
 This function adds splice site consensus sequence to upstream for negative and downstream for positive sample.
 It takes in length, sequence, length of consensus, and either pos or neg to indicate the sample.
@@ -191,7 +191,7 @@ def SpliceSite(length, seq, l, train):
         seq[n+i] = PWMtoBase(s)
 
     return seq
-
+"""
 
 '''
 This function is used to fill all the bases in the sequence other than those already filled.
@@ -247,7 +247,7 @@ def Generate(train, length, conFile, l):
     #Negative set has downstream stop codon
     if train == 'neg':
         seq = DownstreamStop(stop_list, length, seq, l)
-    seq = SpliceSite(length, seq, l, train)
+    """seq = SpliceSite(length, seq, l, train)"""
     seq = Fill(length, seq, train)
 
     return seq
