@@ -134,7 +134,7 @@ def UpstreamStart(start, length, seq, l):
         n = random.randint(1,2)     #choose randomly between 1 or 2 upstream start codons.
 
     #set in_len so that consensus sequence (l/2) and any codon overlaping it will be disregarded for insert site.
-    in_len = int((length-(l/2+2))/3)      #divide by 3 to select each codon not nucleotide
+    in_len = int((length-(l/2+5))/3)      #divide by 3 to select each codon not nucleotide
 
     #select random codon position to insert start codon
     if n == 1:
@@ -162,8 +162,8 @@ def DownstreamStop(stop_list, length, seq, l):
 
     #select a random codon position
     in_len = int(length/3)
-    stop_site = random.randint(in_len+int((l/2+2)/3), in_len*2)     #54-100
-    seq[stop_site*3+1:stop_site*3+4] = stop
+    stop_site = random.randint(in_len+int((l/2+5)/3), in_len*2)     #54-100
+    seq[stop_site*3:stop_site*3+3] = stop
 
     #print(seq)
     #print("".join(i for i in seq))
