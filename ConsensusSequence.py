@@ -1,7 +1,3 @@
-'''
-July 16, 2020
-'''
-
 """
 This python script makes a position weight matrix of the consensus sequence around TIS.
 It reads a file of genomic sequences and gives another file of consensus sequence.
