@@ -1,19 +1,25 @@
 """
+July 12, 2020
+"""
+
+"""
 This python script generates a synthetic TIS dataset for training a prediction model.
 It makes use of consensus sequence, upstream start codon, downstream stop codon, splice site, and nucleotide frequency to generate the dataset.
 It takes a file containing the position weight matrix (pwm).
 It creates two files as outputs, each containing the positive and negative samples.
 
-It is a more simplified, randomized version and also has codon frequency added as a feature.
+It is a more simplified, randomized version of GenerateTIS.py and also has codon frequency added as a feature.
 """
 
+import math
+import random
+import json
 
 '''
 This function forms the basic structure of the synthetic sequence into a list of nucleotides.
 It takes in the start codon and a certain length where len(seq) = length*2+3.
 '''
 def BasicStructure(start, length):
-
     seq = []
     seq += 'u' * length     #upstream sequence
     seq += start            #start codon
@@ -28,8 +34,6 @@ This function takes in either four numbers (probabilities) or a list of the four
 and gives a certain nucleotide that could be selected based on the probability.
 '''
 def PWMtoBase(A,C=None,G=None,T=None):
-    import random
-
     #If only a list is given, then separate it into the corresponding nucleotide.
     if C == None and type(A) is list:
         C,G,T = A[1],A[2],A[3]
@@ -51,9 +55,7 @@ def PWMtoBase(A,C=None,G=None,T=None):
 This function adds the consensus sequence around the start codon for the positive sample.
 It takes a certain length, a sequence, a file with consensus, and l which is the length of consensus.
 '''
-def ConsensusSequence(length, seq, conFile, l):
-    import json
-
+def ConsensusSequence(length, seq, conFile):
     with open(conFile, 'r') as fp:
         consensus = json.load(fp)       #consensus=dictionary with positions as keys and list of probabilities as value
 
@@ -66,45 +68,35 @@ def ConsensusSequence(length, seq, conFile, l):
 
 
 '''
-This function adds the upstream start codon to the positive samples.
+This function adds the upstream start codon to the negative samples.
 It takes in the start codon, length, sequence, and the length of consensus sequence.
 '''
 def UpstreamStart(start, length, seq, l):
-    import random
-
-    #there can be up to two upstream start codons
-    n = random.randint(0,2)
-
-    #set in_len so that consensus sequence and any codon overlaping it will be disregarded for insert site.
-    in_len = int((length-(l+5))/3)      #divide by 3 to select each codon not nucleotide
-
-    #select random codon position to insert start codon
-    if n == 1:
-        pos1 = random.randint(1, in_len)      #the first codon place is not considered to avoid cutting it out later on
-        seq[pos1*3:pos1*3+3] = start
-    elif n == 2:
-        pos1 = random.randint(1, in_len-1)
-        pos2 = random.randint(pos1+1, in_len)
-        seq[pos1*3:pos1*3+3] = start
-        seq[pos2*3:pos2*3+3] = start
+    # select a random codon position
+    in_len = int((length-(l+5))/3)
+    start_site = random.randint(1, in_len)  # last codon place not considered to avoid cutting it out
+    seq[start_site * 3:start_site * 3 + 3] = start
 
     #print(len(seq),"".join(i for i in seq))
     return seq
 
 
 '''
-This function adds a downstream stop codon for negative samples.
-It takes a list of stop codons, length, sequence, and length of consensus.
+This function adds a downstream or upstream stop codon for negative or positive samples.
+It takes a list of stop codons, length, sequence, and length of consensus, and either pos or neg.
 '''
-def DownstreamStop(stop_list, length, seq, l):
-    import random
-
+def Stop(stop_list, length, seq, l, train):
     stop = random.choice(stop_list)     #select a random stop codon
 
-    #select a random codon position
-    in_len = int(length/3)
-    stop_site = random.randint(in_len+int((l+5)/3), in_len*2-1)     #last codon place not considered to avoid cutting it out
-    seq[stop_site*3:stop_site*3+3] = stop
+    if train == 'pos':
+        # set in_len so that consensus sequence and any codon overlaping it will be disregarded for insert site.
+        in_len = int((length-(l+5))/3)  # divide by 3 to select each codon not nucleotide
+        stop_site = random.randint(1, in_len)  # the first codon place is not considered to avoid cutting it out later on
+    else:
+        in_len = int(length / 3)
+        stop_site = random.randint(in_len + int((l+5)/3),
+                                    in_len*2-2)  # last codon place not considered to avoid cutting it out
+    seq[stop_site * 3:stop_site * 3 + 2] = stop
 
     #print(len(seq),"".join(i for i in seq))
     return seq
@@ -112,23 +104,12 @@ def DownstreamStop(stop_list, length, seq, l):
 
 '''
 This function adds splice site consensus sequence to upstream for negative and downstream for positive sample.
-It takes in length, sequence, length of consensus, 'pos' or 'neg' to indicate the sample, and two boolean
-donor and acceptor which indicate which splice sites are added to the sequence (default is True for both).
+It takes in length, sequence, length of consensus, 'pos' or 'neg' to indicate the sample.
 '''
-def SpliceSite(length, seq, l, train, donor, acceptor, cut1, cut2):
-    import random
-
-    if donor==False and acceptor==False:        #No splice site
-        return seq
-    elif donor==True and acceptor==False:       #Donor splice site
-        splice = [[352,361,154,132],[621,131,87,159],[85,45,777,91]]
-    elif donor==False and acceptor==True:       #Acceptor splice site
-        splice = [[242,87,549,120],[251,156,163,428]]
-    elif donor==True and acceptor==True:        #Donor and Acceptor splice site
-        splice = [[352,361,154,132],[621,131,87,159],[85,45,777,91],[242,87,549,120],[251,156,163,428]]
-
+def SpliceSite(length, seq, l, train, cut1, cut2):
+    #Donor splice site
+    splice = [[352,361,154,132],[621,131,87,159],[85,45,777,91]]
     #add splice site downstream for positive and upstream for negative sample
-    #substract cut1/cut2 while selecting to avoid the feature from being cut out
     if train == 'pos':
         n = random.randint(length+l+3, length*2+2-cut2-len(splice))
     else:
@@ -145,15 +126,11 @@ def SpliceSite(length, seq, l, train, donor, acceptor, cut1, cut2):
 This function adds codons to the rest of the sequence.
 It takes in length of sequence, the sequence, and two files that give the codon frequency of upstream and downstream.
 """
-def CodonFrequency(length, seq, CodonFiles):
-    import json
-    import random
-
-    with open(CodonFiles[0],'r') as fp:
+def CodonUsage(length, seq, CodonFile):
+    with open(CodonFile[0],'r') as fp:
         up = json.load(fp)      #dictionary of upstream codon frequency
-    with open(CodonFiles[1],'r') as fp:
+    with open(CodonFile[1],'r') as fp:
         down = json.load(fp)    #dictionary of downstream codon frequency
-
     dna = ['A', 'C', 'G', 'T']
     up_key,up_value,down_key,down_value = [],[],[],[]      #list for storing codon and its frequency for up- and downstream
     for (k1,v1),(k2,v2) in zip(up.items(),down.items()):
@@ -218,11 +195,9 @@ def NucleotideFrequency(length, seq, train):
 '''
 This function generates TIS sequence by combining the above functions.
 It takes in either 'pos' or 'neg, length, file containing consensus, length of consensus sequence,
-codon usage files, donor, acceptor, start and stop arguemtns.
+codon usage files, donor, start and stop arguemtns.
 '''
-def Generate(train, fL, conFile, l, CodonFile, donor, acceptor, start=None, stop=None):
-    import math
-
+def Generate(train, fL, conFile, l, CodonFile, donor, startcheck=None, stopcheck=None):
     #convert final length (fL) to two lengths that are equal and are divisible by 3
     fL -= 3     #remove the length for start codon
     cut = 0     #value needed to cut the sequence to fit final length
@@ -248,16 +223,14 @@ def Generate(train, fL, conFile, l, CodonFile, donor, acceptor, start=None, stop
 
     #generate the sequence
     seq = BasicStructure(start, length)
-        if train == 'pos':
-        if conFile!=None:
-            seq = ConsensusSequence(length, seq, conFile, l)       #add consensus sequence
-        if start==True:
-            seq = UpstreamStart(start, length, seq, l)      #add upstream start codon
-    # Negative set
-    if train == 'neg':
-        if stop==True:
-            seq = DownstreamStop(stop_list, length, seq, l)     #add downstream stop
-    seq = SpliceSite(length, seq, l, train, donor, acceptor, cut1, cut2)     #add splice site
+    if conFile!=None and train=='pos':
+        seq = ConsensusSequence(length, seq, conFile)       #add consensus sequence
+    if startcheck==True and train=='neg':
+        seq = UpstreamStart(start, length, seq, l)       #add upstream start codon
+    if stopcheck==True:
+        seq = Stop(stop_list, length, seq, l, train)     #add downstream stop
+    if donor==True:
+        seq = SpliceSite(length, seq, l, train, cut1, cut2)     #add splice site
     if CodonFile!=None:
         seq = CodonUsage(length, seq, CodonFile)    #fill with codons
     seq = NucleotideFrequency(length, seq, train)       #fill the rest with nucleotides
@@ -279,16 +252,17 @@ def Generate(train, fL, conFile, l, CodonFile, donor, acceptor, start=None, stop
 '''
 This function writes the generated TIS dataset into a file.
 It takes in the number of sequences, output files for positive and negative set, final length, length of consensus,
-and six arguments for features: a file containing consensus, boolean for start and stop codon, donor and acceptor splice sites,
+and six arguments for features: a file containing consensus, boolean for start and stop codon, donor splice sites,
 and a list of files containing codon usage.
 It outputs the two file containing synthetic datasets.
 '''
-def WriteTIS(rows, posFile, negFile,fL=300,l=10,conFile=None,start=True,stop=True,donor=True,acceptor=True,CodonFile=None):
+def WriteTIS(rows, posFile, negFile,fL=300,l=10,conFile=None,startcheck=True,stopcheck=True,donor=True,CodonFile=None):
     tis_pos = open(posFile, "w+")
     tis_neg = open(negFile, "w+")
 
-    print("consensus: {}, start: {}, stop: {}, donor: {}, acceptor: {}, codon: {}".format(conFile,start,stop,donor,acceptor,CodonFile))
-    
+    print("consensus: {}, start: {}, stop: {}, donor: {}, codon: {}".format(
+        isinstance(conFile,str),startcheck,stopcheck,donor,isinstance(CodonFile,list)))
+
     if CodonFile!=None:
         posCodon = CodonFile[0:2]      #CodonFile for positive set
         negCodon = CodonFile[2:4]      #CodonFile for negative set
@@ -297,8 +271,8 @@ def WriteTIS(rows, posFile, negFile,fL=300,l=10,conFile=None,start=True,stop=Tru
 
     #Generate TIS dataset
     for i in range(0, rows):
-        positive = "".join(i for i in Generate('pos',fL,conFile,l,posCodon,donor,acceptor,start=start))
-        negative = "".join(j for j in Generate('neg',fL,conFile,l,negCodon,donor,acceptor,stop=stop))
+        positive = "".join(i for i in Generate('pos',fL,conFile,l,posCodon,donor,startcheck=startcheck,stopcheck=stopcheck))
+        negative = "".join(j for j in Generate('neg',fL,conFile,l,negCodon,donor,startcheck=startcheck,stopcheck=stopcheck))
 
         tis_pos.write(positive+'\n')
         tis_neg.write(negative+'\n')
@@ -306,27 +280,69 @@ def WriteTIS(rows, posFile, negFile,fL=300,l=10,conFile=None,start=True,stop=Tru
     tis_neg.close()
 
 
-c = ['codonUp_pos.txt','codonDown_pos.txt','codonUp_neg.txt','codonDown_neg.txt']
-print("Start generating synthetic datasets")
+
+print("########## {:^50s} ##########".format("Start generating synthetic datasets"))
 #Dataset with all features
-WriteTIS(rows=27102,posFile='arabTIS.pos',negFile='arabTIS.neg',conFile='consensus_sequence.txt',CodonFile=c)
-print("Generated TIS")
+WriteTIS(rows=27102,posFile='arabTIS.pos',negFile='arabTIS.neg',conFile='consensus_sequence.txt')
+print("########## {:^50} ##########".format("Generated TIS"))
+print()
 #Dataset without consensus sequence
-WriteTIS(rows=27102,posFile='arabTIScon.pos',negFile='arabTIScon.neg',CodonFile=c)
-print("Generated TIS without consensus sequence")
+print("########## {:^50s} ##########".format("Start generating synthetic dataset without consensus sequence"))
+WriteTIS(rows=27102,posFile='arabTIScon.pos',negFile='arabTIScon.neg')
+print("########## {:^50} ##########".format("Generated TIS without consensus sequence"))
+print()
 #Dataset without upstream start codon
-WriteTIS(rows=27102,posFile='arabTISstart.pos',negFile='arabTISstart.neg',conFile='consensus_sequence.txt',start=False,CodonFile=c)
-print("Generated TIS without upstream start codon")
-#Dataset wtihout downstream stop codon
-WriteTIS(rows=27102,posFile='arabTISstop.pos',negFile='arabTISstop.neg',conFile='consensus_sequence.txt',stop=False,CodonFile=c)
-print("Generated TIS without downstream stop codon")
-#Dataset without splice sites
-WriteTIS(rows=27102,posFile='arabTISsplice.pos',negFile='arabTISsplice.neg',conFile='consensus_sequence.txt',donor=False,acceptor=False,CodonFile=c)
-print("Generated TIS without splice site")
-WriteTIS(rows=27102,posFile='arabTISdonor.pos',negFile='arabTISdonor.neg',conFile='consensus_sequence.txt',donor=False,CodonFile=c)
-print("Generated TIS without donor splice site")
-WriteTIS(rows=27102,posFile='arabTISacceptor.pos',negFile='arabTISacceptor.neg',conFile='consensus_sequence.txt',acceptor=False,CodonFile=c)
-print("Generated TIS without acceptor splice site")
-#Dataset without codon usage
-WriteTIS(rows=27102,posFile='arabTIScodon.pos',negFile='arabTIScodon.neg',conFile='consensus_sequence.txt')
-print("Generated TIS without codon usage")
+print("########## {:^50s} ##########".format("Start generating synthetic dataset without upstream start codon"))
+WriteTIS(rows=27102,posFile='arabTISstart.pos',negFile='arabTISstart.neg',conFile='consensus_sequence.txt',startcheck=False)
+print("########## {:^50} ##########".format("Generated TIS without upstream start codon"))
+print()
+#Dataset wtihout stop codon
+print("########## {:^50s} ##########".format("Start generating synthetic dataset without stop codon"))
+WriteTIS(rows=27102,posFile='arabTISstop.pos',negFile='arabTISstop.neg',conFile='consensus_sequence.txt',stopcheck=False)
+print("########## {:^50} ##########".format("Generated TIS without stop codon"))
+print()
+#Dataset without donor splice sites
+print("########## {:^50s} ##########".format("Start generating synthetic dataset without donor splice site"))
+WriteTIS(rows=27102,posFile='arabTISdonor.pos',negFile='arabTISdonor.neg',conFile='consensus_sequence.txt',donor=False)
+print("########## {:^50} ##########".format("Generated TIS without donor splice site"))
+print()
+#Dataset with codon usage
+print("########## {:^50s} ##########".format("Start generating synthetic dataset with codon usage"))
+c = ['codonUp_pos.txt','codonDown_pos.txt','codonUp_neg.txt','codonDown_neg.txt']
+WriteTIS(rows=27102,posFile='arabTIScodon.pos',negFile='arabTIScodon.neg',conFile='consensus_sequence.txt',CodonFile=c)
+print("########## {:^50} ##########".format("Generated TIS with codon usage"))
+
+print()
+print()
+
+print("########## {:^50s} ##########".format("Start generating synthetic dataset with only consensus"))
+#Dataset with only consensus
+WriteTIS(rows=27102,posFile='arabTIS_wcon.pos',negFile='arabTIS_wcon.neg',conFile='consensus_sequence.txt',startcheck=False,stopcheck=False,donor=False)
+print("########## {:^50} ##########".format("Generated TIS with consensus"))
+print()
+print("########## {:^50s} ##########".format("Start generating synthetic dataset with only upstream start"))
+#Dataset with only upstream start codon
+WriteTIS(rows=27102,posFile='arabTIS_wstart.pos',negFile='arabTIS_wstart.neg',stopcheck=False,donor=False)
+print("########## {:^50} ##########".format("Generated TIS with upstream start"))
+print()
+print("########## {:^50s} ##########".format("Start generating synthetic dataset with only dowstream stop"))
+#Dataset with only stop codon
+WriteTIS(rows=27102,posFile='arabTIS_wstop.pos',negFile='arabTIS_wstop.neg',startcheck=False,donor=False)
+print("########## {:^50} ##########".format("Generated TIS with stop"))
+print()
+print("########## {:^50s} ##########".format("Start generating synthetic dataset with only donor"))
+#Dataset with only donor splice site
+WriteTIS(rows=27102,posFile='arabTIS_wdonor.pos',negFile='arabTIS_wdonor.neg',startcheck=False,stopcheck=False)
+print("########## {:^50} ##########".format("Generated TIS with only donor"))
+print()
+print("########## {:^50s} ##########".format("Start generating synthetic dataset with only codon"))
+#Dataset with only codon
+c = ['codonUp_pos.txt','codonDown_pos.txt','codonUp_neg.txt','codonDown_neg.txt']
+WriteTIS(rows=27102,posFile='arabTIS_wcodon.pos',negFile='arabTIS_wcodon.neg',startcheck=False,stopcheck=False,donor=False,CodonFile=c)
+print("########## {:^50} ##########".format("Generated TIS with only codon"))
+print()
+print("########## {:^50s} ##########".format("Start generating synthetic dataset with only nucleotide"))
+#Dataset with only nucleotide frequnecy
+WriteTIS(rows=27102,posFile='arabTIS_wnuc.pos',negFile='arabTIS_wnuc.neg',startcheck=False,stopcheck=False,donor=False)
+print("########## {:^50} ##########".format("Generated TIS with only nucleotide"))
+print()
