@@ -11,7 +11,6 @@ It creates two files as outputs, each containing the positive and negative sampl
 It is a more simplified, randomized version of GenerateTIS.py and also has codon frequency added as a feature.
 """
 
-import math
 import random
 import json
 
@@ -72,10 +71,21 @@ This function adds the upstream start codon to the negative samples.
 It takes in the start codon, length, sequence, and the length of consensus sequence.
 '''
 def UpstreamStart(start, length, seq, l):
-    # select a random codon position
-    in_len = int((length-(l+5))/3)
-    start_site = random.randint(1, in_len)  # last codon place not considered to avoid cutting it out
-    seq[start_site * 3:start_site * 3 + 3] = start
+    # there can be up to two upstream start codons
+    n = random.randint(0, 2)
+
+    # set in_len so that consensus sequence and any codon overlaping it will be disregarded for insert site.
+    in_len = int((length - (l + 5)) / 3)  # divide by 3 to select each codon not nucleotide
+
+    # select random codon position to insert start codon
+    if n == 1:
+        pos1 = random.randint(1, in_len)  # the first codon place is not considered to avoid cutting it out later on
+        seq[pos1 * 3:pos1 * 3 + 3] = start
+    elif n == 2:
+        pos1 = random.randint(1, in_len - 1)
+        pos2 = random.randint(pos1 + 1, in_len)
+        seq[pos1 * 3:pos1 * 3 + 3] = start
+        seq[pos2 * 3:pos2 * 3 + 3] = start
 
     #print(len(seq),"".join(i for i in seq))
     return seq
@@ -85,18 +95,12 @@ def UpstreamStart(start, length, seq, l):
 This function adds a downstream or upstream stop codon for negative or positive samples.
 It takes a list of stop codons, length, sequence, and length of consensus, and either pos or neg.
 '''
-def Stop(stop_list, length, seq, l, train):
+def Stop(stop_list, length, seq, l):
     stop = random.choice(stop_list)     #select a random stop codon
 
-    if train == 'pos':
-        # set in_len so that consensus sequence and any codon overlaping it will be disregarded for insert site.
-        in_len = int((length-(l+5))/3)  # divide by 3 to select each codon not nucleotide
-        stop_site = random.randint(1, in_len)  # the first codon place is not considered to avoid cutting it out later on
-    else:
-        in_len = int(length / 3)
-        stop_site = random.randint(in_len + int((l+5)/3),
-                                    in_len*2-2)  # last codon place not considered to avoid cutting it out
-    seq[stop_site * 3:stop_site * 3 + 2] = stop
+    in_len = int(length / 3)
+    stop_site = random.randint(in_len + int((l+5)/3), in_len*2-2)  # last codon place not considered to avoid cutting it out
+    seq[stop_site * 3:stop_site * 3 + 3] = stop
 
     #print(len(seq),"".join(i for i in seq))
     return seq
@@ -205,7 +209,7 @@ def Generate(train, fL, conFile, l, CodonFile, donor, startcheck=None, stopcheck
     if fL%2 == 0:
         length = int(fL/2)
     elif fL%2 == 1:
-        length = math.floor(fL/2)+1
+        length = (fL//2)+1
         cut += 1
     #add nucleotide(s) to make length multiple of 3 (codon)
     if length%3 == 1:
@@ -215,7 +219,7 @@ def Generate(train, fL, conFile, l, CodonFile, donor, startcheck=None, stopcheck
         length += 1
         cut += 1*2
     #cut1 is for upstream and cut2 is for downstream
-    cut1 = math.floor(cut/2)
+    cut1 = cut//2
     cut2 = cut - cut1
 
     start = ['A','T','G']
@@ -225,10 +229,10 @@ def Generate(train, fL, conFile, l, CodonFile, donor, startcheck=None, stopcheck
     seq = BasicStructure(start, length)
     if conFile!=None and train=='pos':
         seq = ConsensusSequence(length, seq, conFile)       #add consensus sequence
-    if startcheck==True and train=='neg':
+    if startcheck==True and train=='pos':
         seq = UpstreamStart(start, length, seq, l)       #add upstream start codon
-    if stopcheck==True:
-        seq = Stop(stop_list, length, seq, l, train)     #add downstream stop
+    if stopcheck==True and train=='neg':
+        seq = Stop(stop_list, length, seq, l)     #add downstream stop
     if donor==True:
         seq = SpliceSite(length, seq, l, train, cut1, cut2)     #add splice site
     if CodonFile!=None:
