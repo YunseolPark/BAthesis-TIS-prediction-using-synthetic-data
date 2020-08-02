@@ -1,0 +1,108 @@
+"""
+This python script calculates the average for contribution scores of the consensus sequence.
+"""
+
+import numpy as np
+
+'''
+This function calculates the average contribution score for a single position through all sequences
+if it matches the corresponding consensus nucleotide.
+It takes in a list of sequences, a list of scores, a consensus nucleotide, and the position on the sequence.
+It outputs the average, median, and length of the score.
+'''
+def Contribution(nucleotidesList, scoresList, p, pos):
+    scores = []
+
+    for nucs,scrs in zip(nucleotidesList,scoresList):
+        #n is a single nucleotide at position pos
+        n = nucs[pos]
+        s = scrs[pos]
+
+        #score = 0 at TIS
+        if pos in [149,150,151]:
+            scores.append(0)
+            continue
+
+        #append scores when nucleotide matches consensus
+        if type(p) == list:
+            if n in map(str.upper, p):
+                scores.append(s)
+        else:
+            if n == p.upper():
+                scores.append(s)
+
+    if len(scores) == 0:
+        return None, None, 0
+
+    return np.mean(scores), np.median(scores), len(scores)
+
+'''
+This function writes the contribution scores.
+It takes in a file, a pattern, or consensus, and another file for output.
+'''
+def WritePattern(filename,pattern,file):
+    import re
+
+    allLines = open(filename).readlines()
+    #indicators of TP/TN/FN/FP
+    m = [[float(x) for x in allLines[i].strip().split(',')] for i in range(0,len(allLines),3)]
+    #nucleotides in a sequence
+    nuc = [allLines[i].rstrip().split(',') for i in range(1,len(allLines),3)]
+    #scores in a sequence
+    score = [[float(a) for a in allLines[i].rstrip().split(',')] for i in range(2,len(allLines),3)]
+
+    #consensus nucleotides as pattern
+    #(A/G) is used to notate co-consensus and these will be inserted into a list in list
+    pat = re.split("[()]", pattern)
+    patternList = []
+    for i in range(0,len(pat)):
+        if "/" in pat[i]:
+            patternList.append(pat[i].split("/"))
+        else:
+            p = [a for a in pat[i]]
+            patternList += p
+
+    #only select for the positive datasets (TP+FN)
+    nucleotidesList = []
+    scoresList =[]
+    for i in range(0,len(m)):
+        if m[i][1]==1:
+            nucleotidesList.append(nuc[i])
+            scoresList.append(score[i])
+
+    average = []
+    median = []
+    length = []
+    position = []
+    #loop along the length of pattern and consensus positions
+    for n,pos in zip(range(0,len(patternList)),range(139,162)):
+        p = patternList[n]
+        avg,med,lngth = Contribution(nucleotidesList,scoresList,p,pos)
+
+        if lngth == 0:
+            avg = 0
+            med = 0
+        average.append(avg)     #average
+        median.append(med)      #median
+        length.append(lngth)    #number of samples taken for average
+        position.append(pos)    #position in sequence
+
+    print(''.join('{:^23} |'.format('/'.join(j)) for j in patternList), file=file)
+    print(''.join('{:^23} |'.format(j) for j in position), file=file)
+    print(''.join('{:^23} |'.format(j) for j in average), file=file)
+    print(''.join('{:^23} |'.format(j) for j in median), file=file)
+    print(''.join('{:^23} |'.format(j) for j in length), file=file)
+
+'''
+This function runs the python script.
+It takes in an input and an output file and a pattern or consensus.
+The pattern can either consist of a number of consensus nucleotides or co-consensus nucleotides in the form of (A/G).
+It can also be either all uppercase or lowercase letters but there cannot be a gap or unknown nucleotide in the middle of the pattern. 
+'''
+def run(pattern, inputFile, outputFile):
+    WritePattern(inputFile, pattern, file = open(outputFile, 'w'))
+
+import sys
+if len(sys.argv) > 1:
+    # python BuildIndividualPatternGraph.py AAAAAAAAAAATGGCGAATAATA SBBM2.txt SBBMcontribution.txt
+    run(sys.argv[1],sys.argv[2],sys.argv[3])
