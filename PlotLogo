@@ -1,0 +1,22 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import logomaker
+
+fig = plt.plot()
+
+tp = pd.read_pickle('RBBMlogo_TP.txt')
+logomaker.validate_matrix(tp)
+n=logomaker.Logo(tp,shade_below=0,fade_below=.7)
+logomaker.Logo.highlight_position_range(n,pmin=149,pmax=151,color='antiquewhite')
+
+n.style_spines(visible=False)
+n.style_spines(spines=['left', 'bottom'], visible=True)
+n.ax.set_xlim(150-7, 150+7)
+n.ax.set_ylabel('Contribution Score')
+n.ax.set_xlabel('Position')
+n.ax.set_xticks(range(150-7,150+7))
+n.ax.set_xticklabels([i for i in range(-6,8)])
+n.ax.set_yticks(range(-14,6,2))
+n.ax.set_yticklabels([i for i in range(-14,6,2)])
+
+plt.show()
