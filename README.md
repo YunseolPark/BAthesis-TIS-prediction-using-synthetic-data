@@ -1,7 +1,19 @@
 # Translation Initiation Site Prediction in Arabidopsis thaliana Using Synthetic Datasets and Black-Box Models
 
-Translation is a part of the central dogma of biology, which is the conversion of DNA into proteins. Simply put, the central dogma includes all processes that happen during the conversion of codons, nucleotide triplets, into amino acids, the building blocks for proteins. Translation specifically deals with the synthesis of proteins from mRNA transcripts and is important for the regulation of genes.
+### Yunseol Park
+### Supervisors: Espoir Kabanga, Jasper Zuallaert, Arnout Van Messem, Wesley De Neve
 
+# Description
+
+# Table of Contents
+1. Introduction
+2. Dataset
+3. Model Training
+4. Feature Analysis
+5. Noise Analysis
+6. References
+
+# 1. Introduction
 Prediction of translation initiation sites (TISs) can give insight into translation and the proteins synthesized by certain mRNAs. Thus, it is important for genome analysis and annotation. Furthermore, the mechanisms of translation have not been perfectly studied. Therefore, by interpreting the prediction model, it may even aid in uncovering new translation mechanisms or give emphasis to an existing one.
 However, a lot of real-world datasets contain noise and errors and many genome annotations like TIS prediction are high-risk problems. An error in TIS could result in faulty proteins which may have varying consequences such as cancer or metabolic diseases (S. Zhang et al., 2017). Furthermore, real-world data are very complex, so it is difficult to find the features that influence the decision of the model.
 Synthetic data can be used to solve this problem. In particular, synthetic data can be used to give insight into the features of the model and thus into the real-world data. They are suitable for this purpose since they are constructed by selecting and incorporating some of the complex features of the real-world dataset. The outcome of the synthetic model can then be compared to the real model to find the features that contribute most to the prediction of TIS. Furthermore, the effect of noise on datasets can also be investigated to see how the model performs with noisy data.
@@ -18,31 +30,21 @@ In order to achieve these goals, the following steps are taken:
 4. Perform feature analysis.
 5. Train the prediction model with noisy data.
 
+# 1. Dataset
 
-# Background
-
-## Translation Initiation
-
-Translation is initiated by the ‘scanning model’ where the ribosome scans along the mRNA for codons (Zeng, Yap, & Wong, 2002). The small ribosomal subunit starts from the 5’ end of the mRNA and scans for the start codon. When it is found, the large ribosomal subunit and tRNA-Met are recruited to the translation initiation site (TIS) and translation is initiated (Figure 3).
-The first ATG, which codes for Methionine, is often the start codon. However, in other cases, the start codon is the second or third ATG of the sequence due to the leaky scanning hypothesis (Pedersen & Nielsen, 1997; Zeng et al., 2002). This hypothesis states that the ribosome may skip one or two ATGs before starting the translation in the next one. The reason behind this behavior is because the context of the sequences around the start codon is taken into account, as well as the start codon itself.
-Aside from the canonical TISs, there exist alternative TISs. These differ from ATG by one nucleotide as discussed by Zhang et al. (2017). However, alternative TISs are not considered in this dissertation since they have less occurrence than the canonical ones.
-
-
-
-
-# Synthetic Dataset
+## Synthetic Dataset
 
 The synthetic dataset, generated via the Python code in file `GenerateTIS.py`, contains 27102 sequences that are 300 nucleotides long. Each TIS is centrally located in the sequence, on the 150th – 152nd nucleotide.
 The dataset is generated with 5 features, adding each feature in a different step (Figure 6). The following sections will discuss each step in detail.
 
 <image>
 
-## Basic Structure
+### Basic Structure
 
 The basic structure is designed so that each TIS, ‘ATG’, is centrally located, with 150 nucleotides upstream and 150 nucleotides downstream, indicated as ‘u’s and ‘d’s in Figure 6 (1), respectively. The upstream and downstream sequences are assigned equal lengths which are divisible by 3. The sequence is designed in this way for easy manipulation. The sequences’ divisibility allows easier addition of codons.
 In designing the sequence, only the canonical TIS was considered for this dissertation.
 
-## Consensus (Kozak) Sequence
+### Consensus (Kozak) Sequence
 
 The first feature to be added to the synthetic dataset is the consensus sequence, as shown in Figure 6 (2). It is only added to the positive dataset since it is a sequence that would indicate the presence of TIS. The upstream consensus sequence spans from positions -10 to -1 and the downstream consensus sequence spans from positions +3 to +12 where 0, 1, 2 indicate the ‘ATG’ (Table 3). In this dissertation, a nucleotide followed by a superscript will be used to denote a nucleotide at that position. For example, G at position +3 will be denoted as G+3.
 The data for the consensus sequence was obtained from the real dataset using the Python code, `ConsensusSequence.py`. The consensus sequence was determined using the 50/70% rule, a modification of Cavener 50/75% rule.
@@ -66,18 +68,18 @@ The data for the consensus sequence was obtained from the real dataset using the
 
 
 
-## Upstream ATG
+### Upstream ATG
 
 An upstream ATG is only inserted for the positive dataset, as shown in Figure 6 (3). It is added to any random position between the start of the sequence and the start of the consensus sequence. The number of start codons to be inserted is determined randomly, varying from 0 to 2.
 Zuallaert et al. (2018b) reported that upstream ATGs have a negative influence on the prediction of TIS while downstream ATGs have a positive influence by learning the properties of the scanning model. However, in this dissertation, it was added as a feature for the positive set in order to investigate if the model would be able to learn the leaky scanning hypothesis along with the scanning model given enough context around TIS.
 Furthermore, it was added to investigate if the positive influence of the context around TIS would be able to compensate for the negative influence of upstream ATGs. Since almost 40% of TISs from the real-world data have upstream ATGs (Pedersen & Nielsen, 1997), this investigation would give insight into how the prediction model behaves with TISs having upstream ATGs.
 
-## Downstream Stop Codons
+### Downstream Stop Codons
 
 The downstream stop codons are only inserted for the negative dataset as it signals the end of the translation mechanism. This can be seen in Figure 6 (3). The stop codons are ‘TAA’, ‘TAG’, and ‘TGA’. One stop codon is randomly selected and added at a random position between the end of the central ATG and the end of the sequence.
 As this feature is only added to the negative dataset, any in-frame downstream stop codons added to the positive dataset due to the random addition of nucleotides are removed from the sequence.
 
-## Donor Splice Site
+### Donor Splice Site
 
 The donor splice site pattern, as seen in Table 4, shows the first three consensus nucleotide frequencies of donor splice site. These three nucleotides are a part of the splicing residues that can be found in the exon.
 The donor splice site is added downstream for the samples in the positive dataset and upstream for the samples in the negative dataset, as illustrated in Figure 6 (4). This is because, normally, the first gene (exon) will contain a TIS while non-start ATGs are more likely to occur inside a gene (Zuallaert, Kim, et al., 2018).
@@ -92,7 +94,7 @@ The data for the donor splice site consensus sequence were obtained from Kim (20
 | Consensus |  C  |  A  |  G  |
 
 
-## Nucleotide Frequency
+### Nucleotide Frequency
 
 The empty space after the insertion of codons is then filled with nucleotide frequency, as seen in Figure 6 (5). The nucleotide frequency for the samples in the positive dataset can be found in Table 5 and the nucleotide frequency for the samples in the negative dataset can be found in Table 6.
 
@@ -109,7 +111,7 @@ The empty space after the insertion of codons is then filled with nucleotide fre
  
 The nucleotide frequency was gathered from the real dataset. Only the regions disregarding the central ATG codon and the consensus sequence were taken for nucleotide frequency. The reason behind this was to use nucleotide frequency to replace the consensus sequence when training a model without it in a later part of the experiment.
 
-# Model Training
+# 2. Model Training
 
 Models are trained using both synthetic and real datasets. The synthetic black-box model (SBBM) is a model trained on synthetic data only while the real black-box model (RBBM) is a model trained on real data only. The results obtained by the two models will be compared.
 
