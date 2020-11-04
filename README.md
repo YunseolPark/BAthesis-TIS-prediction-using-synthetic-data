@@ -1,17 +1,17 @@
 # Translation Initiation Site Prediction in Arabidopsis thaliana Using Synthetic Datasets and Black-Box Models
 
 #### Yunseol Park
-#### Supervisors: Espoir Kabanga, Jasper Zuallaert, Arnout Van Messem, Wesley De Neve
+#### Supervisors: [Espoir Kabanga](https://github.com/EspoirKabanga), Jasper Zuallaert, [Arnout Van Messem](https://github.com/avmessem), Wesley De Neve
 
 ## Description
 
 ## Table of Contents
-1. Introduction
-2. Dataset
-3. Model Training
-4. Feature Analysis
-5. Noise Analysis
-6. References
+1. [Introduction](#1.-introduction)
+2. [Dataset](#2.-dataset)
+3. [Model Training](#3.-model-training)
+4. [Feature Analysis](#4.-feature-analysis)
+5. [Noise Analysis](#5.-noise-analysis)
+6. [References](#6.-references)
 
 # 1. Introduction
 
