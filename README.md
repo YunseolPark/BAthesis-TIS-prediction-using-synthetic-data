@@ -15,7 +15,7 @@ The synthetic datasets were built from scratch using features known to be import
 5. [Noise Analysis](#noise-analysis)
 6. [References](#references)
 
-## Introduction
+## 1. Introduction
 
 Prediction of translation initiation sites (TISs) can give insight into translation and the proteins synthesized by certain mRNAs. Thus, it is important for genome analysis and annotation. Furthermore, the mechanisms of translation have not been perfectly studied. Therefore, by interpreting the prediction model, it may even aid in uncovering new translation mechanisms or give emphasis to an existing one.
 However, a lot of real-world datasets contain noise and errors and many genome annotations like TIS prediction are high-risk problems. Furthermore, real-world data are extremely complex, which makes it difficult to find the features that influence the decision of the model.
