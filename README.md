@@ -6,8 +6,8 @@
 ## Description
 
 ## Table of Contents
-1. [Introduction](#-1.-introduction)
-2. [Dataset](#-2.-dataset)
+1. [Introduction](-1-introduction)
+2. [Dataset](-2-dataset)
 3. [Model Training](#3.-model-training)
 4. [Feature Analysis](#4.-feature-analysis)
 5. [Noise Analysis](#5.-noise-analysis)
