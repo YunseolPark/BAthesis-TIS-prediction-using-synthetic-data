@@ -60,6 +60,8 @@ The basic structure is designed so that each TIS, ‘ATG’, is centrally locate
 The first feature to be added to the synthetic dataset is the consensus sequence, as shown in Figure 6 (2). The upstream consensus sequence spans from positions -10 to -1 and the downstream consensus sequence spans from positions +3 to +12 where 0, 1, 2 indicate the ‘ATG’ (Table 3). In this dissertation, a nucleotide followed by a superscript will be used to denote a nucleotide at that position. For example, G at position +3 will be denoted as G_+3.
 The data for the consensus sequence was obtained from the real dataset using the Python code,`ConsensusSequence.py`. The consensus sequence was determined using the 50/70% rule, a modification of Cavener 50/75% rule ([Cavener, 1987]).
 
+<p align="center">
+
 |           | -10 | -9 | -8 | -7 | -6 | -5 | -4 |  -3 |  -2 | -1 |
 |:---------:|:---:|:--:|:--:|:--:|:--:|:--:|:--:|:---:|:---:|:--:|
 |     A%    |  35 | 32 | 34 | 35 | 36 | 33 | 45 |  50 |  42 | 44 |
@@ -77,6 +79,8 @@ The data for the consensus sequence was obtained from the real dataset using the
 |     G%    |  20 | 21 | 18 | 20 | 22 | 17 | 21 |  24 |  9  | 23 |
 |     T%    |  29 | 30 | 27 | 28 | 27 | 26 | 19 |  15 |  20 | 14 |
 | Consensus |  a  |  a |  a |  a |  a |  a |  a | A/G | A/C |  a |
+
+</p>
 
 #### Upstream ATG
 An upstream ATG is only inserted for the positive dataset, as shown in Figure 6 (3). It is added to any random position between the start of the sequence and the start of the consensus sequence. The number of start codons to be inserted is determined randomly, varying from 0 to 2.
