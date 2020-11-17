@@ -18,7 +18,12 @@ In order to achieve these goals, the following steps are taken:
 4. Perform feature analysis.
 5. Train the prediction model with noisy data.
 
+<p align="center">
+  <img src="https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/schematic_plan.png" />
+  Schematic Plan
+</p>
 ![Schematic Plan](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/schematic_plan.png)
+<div align="center">Schematic Plan</div>
 
 ## Table of Contents
 1. [Introduction](#introduction)
