@@ -19,7 +19,7 @@ In order to achieve these goals, the following steps are taken:
 5. Train the prediction model with noisy data.
 
 <p align="center">
-  ![schematic plan](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/schematic_plan.png)
+  <img src="https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/schematic_plan.png" />
   Schematic Plan
 </p>
 
@@ -48,7 +48,7 @@ The synthetic dataset, generated via the Python code in file `GenerateTIS.py`, c
 The dataset is generated with 5 features, adding each feature in a different step (Figure 1). The following sections will discuss each step in detail.
 
 <p align="center">
-  ![Schematic Plan](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/synthetic_data.png)
+  <img src="https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/synthetic_data.png" />
   Process used for generating a synthetic dataset, containing positive (left) and negative (right) samples.
   The central start codon is in bold and underlined, while the changes are indicated in red.
 </p>
@@ -133,7 +133,7 @@ Recall (sensitivity), precision, accuracy, and F1 score were used for the evalua
 Perturbation (Shrikumar et al., 2017) is the modification of an input feature where the modification can be used to analyze the impact of said feature. The perturbance strategy used in this project is occlusion, which is the removal of feature(s)/region(s) in the input. It is possible to occlude a single feature and it is also possible to occlude all features except for the feature of interest.
 
 <p align="center">
-  ![occlusion](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/occlusion.png)
+  <img src="https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/occlusion.png" />
 </p>
 
 
@@ -171,11 +171,9 @@ The sequence logo can visualize the contribution of each nucleotide in a certain
 
 Noisy data can affect a model by reducing its performance in general. Noise can be measured by equalized loss of accuracy (ELA). It measures the behavior of a model at a certain noise level (Sáez et al., 2016).
 
-<p align="center">
-  ![ELA](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/formula_ela.png)
-</p>
+![ELA](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/formula_ela.png)
 
-where 𝐸𝐿𝐴<sub>𝑥%</sub> refers to the measure of behavior at noise level 𝑥%, 𝐴<sub>0%</sub> refers to the accuracy without any noise, and 𝐴<sub>𝑥%</sub> refers to the accuracy at noise level 𝑥%. Accuracy is calculated  and then converted into a percentage value. A lower ELA value will indicate that the model behaves better with the given noise.
+where [𝐸𝐿𝐴]<sub>𝑥%</sub> refers to the measure of behavior at noise level 𝑥%, 𝐴<sub>0%</sub> refers to the accuracy without any noise, and 𝐴<sub>𝑥%</sub> refers to the accuracy at noise level 𝑥%. Accuracy is calculated  and then converted into a percentage value. A lower ELA value will indicate that the model behaves better with the given noise.
 
 There are many sources of noise, but in this dissertation, only two are investigated:
 1. incorrect labeling or misclassification of training data (class noise); and
