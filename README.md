@@ -123,9 +123,14 @@ All three models were trained with datasets partitioned in a way that 90% is for
 Recall (sensitivity), precision, accuracy, and F1 score were used for the evaluation metrics.
 
 ![Recall](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/formula_recall.png)
+<br/>
 ![precision](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/formula_precision.png)
+<br/>
 ![accuracy](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/formula_accuracy.png)
+<br/>
 ![F1](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/formula_f1.png)
+
+where TP, TN, FP, FN refer to true positive, true negative, false positive, and false negative, respectively.
 
 ## Feature Analysis
 
