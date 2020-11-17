@@ -18,7 +18,7 @@ In order to achieve these goals, the following steps are taken:
 4. Perform feature analysis.
 5. Train the prediction model with noisy data.
 
-<image>
+![Schematic Plan](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/schematic_plan.png)
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -43,7 +43,8 @@ The dataset is constructed in a way that the TIS (positive set) or non-TIS ATG (
 The synthetic dataset, generated via the Python code in file `GenerateTIS.py`, contains 27102 sequences that are 300 nucleotides long. Each TIS is centrally located in the sequence, on the 150th – 152nd nucleotide. They were generated with the same structure as the real dataset.
 The dataset is generated with 5 features, adding each feature in a different step (Figure 1). The following sections will discuss each step in detail.
 
-<image>
+![Process used for generating a synthetic dataset, containing positive (left) and negative (right) samples.
+The central start codon is in bold and underlined, while the changes are indicated in red.](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/synthetic_data.png)
 
 #### Basic Structure
 The basic structure is designed so that each TIS, ‘ATG’, is centrally located, with 150 nucleotides upstream and 150 nucleotides downstream, indicated as ‘u’s and ‘d’s in Figure 6 (1), respectively. The upstream and downstream sequences are assigned equal lengths which are divisible by 3. The sequence is designed in this way for easy manipulation, namely, easier addition of codons. Then, after the dataset has been created, sequences on the sides will be cleaved off to get the desired length of 300.
@@ -114,12 +115,17 @@ All three models were trained with datasets partitioned in a way that 90% is for
 ### Metrics
 Recall (sensitivity), precision, accuracy, and f1 score were used for the evaluation metrics.
 
+![](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/formula_recall.png)
+![](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/formula_precision.png)
+![](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/formula_accuracy.png)
+![](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/formula_f1.png)
+
 ## Feature Analysis
 
 ### Perturbance-based Method
 Perturbation (Shrikumar et al., 2017) is the modification of an input feature where the modification can be used to analyze the impact of said feature. The perturbance strategy used in this project is occlusion, which is the removal of feature(s)/region(s) in the input. It is possible to occlude a single feature and it is also possible to occlude all features except for the feature of interest.
 
-<image>
+![](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/occlusion.png)
 
 The analysis of models with missing features allows for the evaluation and visualization of important features through comparison of the evaluation metrics (obtained by testing with the real dataset). The lower the metrics value, the more influential the (missing) feature and vice versa.
 
@@ -155,8 +161,7 @@ The sequence logo can visualize the contribution of each nucleotide in a certain
 
 Noisy data can affect a model by reducing its performance in general. Noise can be measured by equalized loss of accuracy (ELA). It measures the behavior of a model at a certain noise level (Sáez et al., 2016).
 
-<𝐸𝐿𝐴<sub>𝑥%</sub> = 100 − 𝐴<sub>𝑥%</sub> 𝐴 <sub>0%</sub>>
-<add image for calc>
+![](https://github.com/YunseolPark/BAthesis-TIS-prediction-using-synthetic-data/blob/master/images/formula_ela.png)
 
 where 𝐸𝐿𝐴<sub>𝑥%</sub> refers to the measure of behavior at noise level 𝑥%, 𝐴<sub>0%</sub> refers to the accuracy without any noise, and 𝐴<sub>𝑥%</sub> refers to the accuracy at noise level 𝑥%. Accuracy is calculated  and then converted into a percentage value. A lower ELA value will indicate that the model behaves better with the given noise.
 
