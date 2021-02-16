@@ -191,6 +191,9 @@ During this experiment, the codon usage table is also considered. The codon usag
 By investigating the impact of ‘noise’ that may be added with the insertion of nucleotide triplets, the impact of codons on TIS prediction can be investigated. The dataset with nucleotide triplets is created by removing nucleotide frequency and replacing it with the values obtained from the codon usage table. This would eliminate the addition of nonsense codons and will ensure that the dataset has meaningful triplets, although it would not ensure the production of functional proteins from the sequences.
 
 
+*The above are not complete account of the bachelor's dissertation. They are merely the explanations of the python files uploaded to this page with regards to the dissertation.*
+
+
 <References>
 
 [Magana-Mora et al. (2013)]: <https://academic.oup.com/bioinformatics/article/29/1/117/272605>
