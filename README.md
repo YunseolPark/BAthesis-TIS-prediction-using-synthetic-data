@@ -32,7 +32,7 @@ In order to achieve these goals, the following steps are taken:
 4. [Feature Analysis](#feature-analysis)
 5. [Noise Analysis](#noise-analysis)
 
-* **Note:** The following readme file is not a complete account of the bachelor's dissertation. It is merely the explanation of the python files uploaded to this page with regards to the dissertation.*
+***Note:** The following readme file is not a complete account of the bachelor's dissertation. It is merely the explanation of the python files uploaded to this page with regards to the dissertation.*
 
 ## Introduction
 
