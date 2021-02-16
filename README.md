@@ -32,6 +32,8 @@ In order to achieve these goals, the following steps are taken:
 4. [Feature Analysis](#feature-analysis)
 5. [Noise Analysis](#noise-analysis)
 
+* **Note:** The following readme file is not a complete account of the bachelor's dissertation. It is merely the explanation of the python files uploaded to this page with regards to the dissertation.*
+
 ## Introduction
 
 Prediction of translation initiation sites (TISs) can give insight into translation and the proteins synthesized by certain mRNAs. Thus, it is important for genome analysis and annotation. Furthermore, the mechanisms of translation have not been perfectly studied. Therefore, by interpreting the prediction model, it may even aid in uncovering new translation mechanisms or give emphasis to an existing one.
