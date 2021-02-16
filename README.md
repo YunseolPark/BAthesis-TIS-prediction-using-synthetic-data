@@ -23,6 +23,7 @@ In order to achieve these goals, the following steps are taken:
   Schematic Plan
 </p>
 
+*The following readme file is not a complete account of the bachelor's dissertation. It is merely the explanation of the python files uploaded to this page with regards to the dissertation.*
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -189,9 +190,6 @@ Each model that was trained with a dataset having a missing feature is used as a
 
 During this experiment, the codon usage table is also considered. The codon usage table is a table that shows the frequency of each codon. The code for obtaining codon usage can be found in `CodonUsage.py`. The feature of codons will be denoted as a nucleotide triplet in this documentation.
 By investigating the impact of ‘noise’ that may be added with the insertion of nucleotide triplets, the impact of codons on TIS prediction can be investigated. The dataset with nucleotide triplets is created by removing nucleotide frequency and replacing it with the values obtained from the codon usage table. This would eliminate the addition of nonsense codons and will ensure that the dataset has meaningful triplets, although it would not ensure the production of functional proteins from the sequences.
-
-
-*The above are not complete account of the bachelor's dissertation. They are merely the explanations of the python files uploaded to this page with regards to the dissertation.*
 
 
 <References>
