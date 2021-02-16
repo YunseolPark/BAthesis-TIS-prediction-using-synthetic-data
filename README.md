@@ -3,7 +3,7 @@
 ### Bachelor's dissertation in Center of Biotech Data Science, Ghent University Global Campus
 #### Yunseol Park
 #### Counselors: [Espoir Kabanga](https://github.com/EspoirKabanga), Jasper Zuallaert
-#### Suprevisors: [Arnout Van Messem](https://github.com/avmessem), Wesley De Neve
+#### Supervisors: [Arnout Van Messem](https://github.com/avmessem), Wesley De Neve
 
 ## Description
 The main goals of the research effort presented in this project are as follows:
